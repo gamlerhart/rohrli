@@ -1,0 +1,7 @@
+You requested {request-url}. You already downloaded this pipe.
+
+This was a pure streaming pipe. You can download it only once.
+
+Please start your upload again.
+
+{guide}

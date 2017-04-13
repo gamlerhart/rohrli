@@ -1,0 +1,11 @@
+cURL guide:
+
+Basics:
+- Shows this help text. (or web page in a browser)
+    curl {service-url}
+- Pipe a file to röhrli. It will respond with an URL:
+    cat my-file | curl -N --data-binary @- {service-url}
+- The request will give you an URL. Then read from it on another place:
+    curl {the-url-returned} > my-file
+
+Any question? Email: roman.stoffel@gamlor.info. Twitter: @gamlerhart

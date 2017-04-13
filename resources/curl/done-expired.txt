@@ -1,0 +1,5 @@
+You requested {request-url}. This pipe expired =(
+
+Please start your upload again.
+
+{guide}

@@ -1,0 +1,6 @@
+You requested {request-url}. We didn't find it anywhere =(.
+Please upload your file first.
+
+cURL guide:
+
+{guide}
