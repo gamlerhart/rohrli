@@ -3,8 +3,7 @@
   (:gen-class)
   (:require
     [ring.util.servlet :as servlet]
-    [clojure.tools.logging :as log]
-    [ring.middleware.cookies :refer [wrap-cookies]])
+    [clojure.tools.logging :as log])
   (:import (org.eclipse.jetty.server Server Request Handler)
            (org.eclipse.jetty.server.handler ResourceHandler ContextHandler ContextHandlerCollection HandlerList AbstractHandler)
            (java.util UUID)
@@ -23,27 +22,6 @@
     resource-handler))
 
 
-(defn- session-cookie
-  [id]
-  {:cookies {"session" {:value id :max-age 3600 :http-only true}}})
-
-(defn- new-session-cookie
-  []
-  (session-cookie (str (UUID/randomUUID))))
-
-
-(defn with-cookies
-  [page-handler]
-  (fn [request-map]
-    (let
-      [
-       session (get-in request-map [:cookies "session" :value])
-       result (page-handler request-map)
-       with-session (cond
-                      (and result session) result
-                      result (merge (new-session-cookie) result)
-                      :else nil)]
-      with-session)))
 
 (defn our-handler
   [page-handler]
@@ -52,9 +30,8 @@
       (try
         (let [url (.getRequestURI request)
               start (System/currentTimeMillis)
-              full-handler (wrap-cookies (with-cookies page-handler))
               request-map (servlet/build-request-map request)
-              response-data (full-handler (merge request-map {::raw-req request ::raw-response response}))]
+              response-data (page-handler (merge request-map {::raw-req request ::raw-response response}))]
           (log/info "incomming:" (.getMethod request) url)
           (when response-data
             (if (::is-raw-reponse response-data)
