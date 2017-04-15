@@ -16,7 +16,7 @@
 
 
         <method_context>
-            <method_credential user="rohrlid" group="rohrlid"/>
+            <method_credential user="rohrlid" group="rohrlid" privileges='basic,net_privaddr'/>
         </method_context>
 
         <exec_method type="method" name="start" exec="/etc/rohrli/bin/rohrli.sh" timeout_seconds="60"/>

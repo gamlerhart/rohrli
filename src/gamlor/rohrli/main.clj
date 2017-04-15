@@ -7,7 +7,7 @@
             [clojure.string :as str]
             [clojure.java.io :as io]
             [clojure.tools.logging :as log])
-  (:import (java.io InputStream ByteArrayInputStream PrintWriter FilterInputStream)
+  (:import (java.io InputStream ByteArrayInputStream PrintWriter FilterInputStream ByteArrayOutputStream)
            (java.nio.charset StandardCharsets)
            (javax.servlet.http HttpServletRequest HttpServletResponse)
            (java.security SecureRandom)
@@ -17,8 +17,28 @@
            (org.apache.commons.fileupload.servlet ServletFileUpload)
            (org.apache.commons.fileupload FileItemIterator FileItemStream)))
 
-(def server-url-env-var "SERVER_URL")
-(def ^:dynamic service-url (or (System/getenv server-url-env-var) "http://localhost:8080"))
+(def config
+  (let [cfg-file (io/file "./config.clj")
+        cfg-file-path (.getCanonicalPath cfg-file)
+        _ (log/info "Looking for log file in: " cfg-file-path)
+        cfg (if (.exists cfg-file)
+              (do
+                (log/info "loading config from " cfg-file-path)
+                (load-file cfg-file-path))
+              {}
+              )
+        final-cfg (merge
+                    {:url "http://localhost:80"
+                     ::web/cert-password ""
+                     ::web/http-port 80
+                     ::web/https-port 443}
+                    cfg)]
+    (log/info "Loaded config is" cfg)
+    (log/info "Final config is" final-cfg)
+    final-cfg
+    ))
+
+(def ^:dynamic service-url (:url config))
 
 (defn- response-type
   [headers]
@@ -195,14 +215,9 @@
         url (str service-url "/" link-id)
         ^String text (fill-template (response-type template-created) {:download-url url})
         writer (.getWriter resp)]
-    (.setHeader resp "Content-Type" (response-type response-types))
-    (.setHeader resp "Location" url)
-    (.setStatus resp 201)
-    (.write writer text)
-    (.flush writer)
-    (.flushBuffer resp)
-    (let [async (.startAsync req)
-          reader (pipe-reader req)]
+    (let [reader (pipe-reader req)
+          async (.startAsync req)
+          ]
       (.setTimeout async (.toMillis async-timeout))
       (swap! state/waiting-request
              (fn [current]
@@ -216,6 +231,12 @@
                    ::response-type response-type}}
                  current)
                ))
+      (.setHeader resp "Content-Type" (response-type response-types))
+      (.setHeader resp "Location" url)
+      (.setStatus resp 201)
+      (.write writer text)
+      (.flush writer)
+      (.flushBuffer resp)
       (.incrementAndGet state/created-count)
       )
     )
@@ -309,10 +330,8 @@
 (defn -main
   [& args]
   (println "starting. Arguments: " args)
-  (log/info "Using url " service-url " Change url by setting enviroment variable " + server-url-env-var)
   (let [server
-        (web/start-server 8080
-                          (app-routes))
+        (web/start-server (app-routes) config)
         ]
     (while (= 0 (.available (System/in)))
       (Thread/sleep 1000))

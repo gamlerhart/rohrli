@@ -9,6 +9,7 @@ if ! [[ -d /etc/rohrli ]]; then
     echo "Creating service user"
     groupadd rohrlid
     useradd -grohrlid -m rohrlid
+    usermod -K defaultpriv=basic,net_privaddr rohrlid
 else
     echo "Existing installation. Updating"
 fi

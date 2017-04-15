@@ -3,12 +3,14 @@
   (:gen-class)
   (:require
     [ring.util.servlet :as servlet]
-    [clojure.tools.logging :as log])
+    [clojure.tools.logging :as log]
+    [clojure.java.io :as io])
   (:import (org.eclipse.jetty.server Server Request Handler Connector ServerConnector HttpConnectionFactory)
            (org.eclipse.jetty.server.handler ResourceHandler ContextHandler ContextHandlerCollection HandlerList AbstractHandler)
            (java.util UUID)
            (javax.servlet.http HttpServletResponse)
-           (java.net InetSocketAddress)))
+           (java.net InetSocketAddress)
+           (org.eclipse.jetty.util.ssl SslContextFactory)))
 
 (defn static-content-handler
   []
@@ -51,6 +53,20 @@
                              (.setStatus response 500)
                              (.setHandled base-request true)))))))
 
+(defn https-only-handler
+  [config]
+  (proxy [AbstractHandler] []
+    (handle [_ ^Request base-request request ^HttpServletResponse response]
+      (if (.isSecure request)
+        (do
+          (.setHeader response "Strict-Transport-Security" "max-age=31536000")
+          nil)
+        (do
+          (.setStatus response 301)
+          (.setHeader response "Location" (str (:url config) (.getRequestURI request)))
+          (.setHandled base-request true)
+          )
+        ))))
 
 (def last-server (atom nil))
 
@@ -58,22 +74,62 @@
   []
   (swap! last-server (fn [s] (when s (.stop s)) nil)))
 
+(defn- jetty-ssl-context
+  [key-store-file password]
+
+  (log/info "Looking at key file? " key-store-file)
+  (when (not (.exists (io/file key-store-file)))
+    (log/error "Key file does not exist? " key-store-file)
+    )
+  (let [ssl-factory (new SslContextFactory)]
+    (.setKeyStorePath ssl-factory key-store-file)
+    (.setKeyStorePassword ssl-factory password)
+    (.setKeyManagerPassword ssl-factory password)
+    ssl-factory))
+
+(defn- jetty-http
+  [server {port ::http-port}]
+  (let [connector (new ServerConnector
+                       server
+                       )]
+    (.setPort connector port)
+    connector
+    )
+  )
+
+(defn- jetty-https
+  [server {port ::https-port cert ::https-cert password ::cert-password}]
+  (let [connector (new ServerConnector
+                       server
+                       (jetty-ssl-context cert password))]
+    (.setPort connector port)
+    connector
+    )
+  )
 
 (defn start-server
-  ([port page-handler]
+  ([page-handler config]
 
-   (let [server (new Server)
-         handlers [(our-handler page-handler) (static-content-handler)]
+   (let [
+         url (:url config)
+         use-https (and (::https-cert config) (::cert-password config))
+         server (new Server)
+         general-handlers [(our-handler page-handler) (static-content-handler)]
+         handlers (if use-https
+                    (cons (https-only-handler config) general-handlers)
+                    general-handlers)
          handler-list (new HandlerList)
-         connector (doto (ServerConnector. server 1 1) (.setHost "localhost") (.setPort port))
-         _ (.setConnectors server (into-array Connector [connector]))
+         connectors (if use-https
+                      [(jetty-https server config) (jetty-http server config)]
+                      [(jetty-http server config)]
+                      )
+         _ (.setConnectors server (into-array Connector connectors))
          _ (.setHandlers handler-list (into-array Handler handlers))
          _ (. server (setHandler handler-list))
          _ (swap! last-server (fn [s] (when s (.stop s)) server))
          _ (. server (start))]
      server))
-  ([page-handler]
-   (start-server 8080 page-handler)))
+  )
 
 
 

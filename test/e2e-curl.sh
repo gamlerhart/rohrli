@@ -2,7 +2,7 @@
 
 TESTDIR=`dirname $0`
 APPDIR=`readlink -f $TESTDIR/../`
-export SERVER=http://localhost:8080
+export SERVER=http://localhost
 SERVER_PID_FILE=$APPDIR/target/e2e-server.pid
 
 if [ -e $SERVER_PID_FILE ]; then
