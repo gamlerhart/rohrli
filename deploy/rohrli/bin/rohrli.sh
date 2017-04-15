@@ -23,5 +23,5 @@ fi
 if [[ -f $JAVA_HOME/bin/java ]]; then
     JAVA_CMD=$JAVA_HOME/bin/java
 fi
-$JAVA_CMD $JAVA_ARGS -jar "$JAR_FILE" "$SITE_NAME"
+$JAVA_CMD $JAVA_ARGS -jar "$JAR_FILE"
 
