@@ -17,7 +17,8 @@
            (org.apache.commons.fileupload.servlet ServletFileUpload)
            (org.apache.commons.fileupload FileItemIterator FileItemStream)))
 
-(def ^:dynamic service-url "http://localhost:8080")
+(def server-url-env-var "SERVER_URL")
+(def ^:dynamic service-url (or (System/getenv server-url-env-var) "http://localhost:8080"))
 
 (defn- response-type
   [headers]
@@ -308,11 +309,12 @@
 (defn -main
   [& args]
   (println "starting. Arguments: " args)
-  ;(let [server
-  ;      (web/start-server 8080
-  ;                        (app-routes))
-  ;      ]
-  ;  (while (= 0 (.available (System/in)))
-  ;    (Thread/sleep 1000))
-  ;  (.stop server))
+  (log/info "Using url " service-url " Change url by setting enviroment variable " + server-url-env-var)
+  (let [server
+        (web/start-server 8080
+                          (app-routes))
+        ]
+    (while (= 0 (.available (System/in)))
+      (Thread/sleep 1000))
+    (.stop server))
   )

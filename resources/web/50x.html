@@ -5,7 +5,7 @@
     <!-- Basic Page Needs
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
     <meta charset="utf-8">
-    <title>Röhrli: Pipe your Files via Web</title>
+    <title>Röhrli: Oups, I screwed something up</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -34,55 +34,17 @@
 –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 <div class="container">
     <section class="header">
-        <h2 class="title">Röhrli: Pipe your Files via Web</h2>
+        <h2 class="title">Röhrli: Oups, I screwed something up</h2>
     </section>
 
     <div class="docs-section" id="intro">
-
-        <h4>Problem</h4>
-        <p>
-            You want to copy some file from you're box to another.
-            Shoot! There's not direct scp connection between the boxes.
-            Or it's cumbersome to get from one machine to another.
-        </p>
-        <h4>Solution</h4>
-        <p>
-
-            Use Röhrli! Pipe your file via the web to another machine.
-            You don't even need to install anything! CURL is enough!
-        </p>
-        <h4>Using with CURL</h4>
-        <pre><code class="prettyprint">cURL guide:
-
-    Basics:
-    - Shows this help text. (or web page in a browser)
-        curl https://rohrli.gamlor.info
-    - Pipe a file to röhrli. It will respond with an URL:
-        cat my-file | curl -N --data-binary @- https://rohrli.gamlor.info
-    - The request will give you an URL. Then read from it on another place:
-        curl {the-url-returned} > my-file
-        </code>
-        </pre>
-        <h4>Using Browser</h4>
-        <form id="uploadForm"
-              enctype="multipart/form-data"
-              method="post">
-            <div id="uploadStatus"></div>
-
-            <div id="error"></div>
-            <input type="file" name="fileToUpload" id="fileToUpload"/>
-            <input id="uploadButton" type="button" value="Upload"/>
-            <div id="fileName"></div>
-            <div id="fileSize"></div>
-            <div id="progressNumber"></div>
-        </form>
-    </div>
-    <div>
-        <h4>Contact</h4>
+        <p>Something when wrong. This means I screwed something up. Let me know:</p>
         <p>
             Email: <a href="mailto:roman.stoffel@gamlor.info">roman.stoffel@gamlor.info</a>
             <br/>
             Twitter: <a href="https://twitter.com/gamlerhart">@gamlerhart</a>
+            <br/>
+            Blog: <a href="https://gamlor.info/wordpress">https://gamlor.info/wordpress</a>
         </p>
     </div>
 </div>
@@ -90,5 +52,4 @@
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 </body>
-<script src="scripts/rohrli.js"></script>
 </html>

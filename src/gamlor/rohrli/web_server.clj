@@ -4,10 +4,11 @@
   (:require
     [ring.util.servlet :as servlet]
     [clojure.tools.logging :as log])
-  (:import (org.eclipse.jetty.server Server Request Handler)
+  (:import (org.eclipse.jetty.server Server Request Handler Connector ServerConnector HttpConnectionFactory)
            (org.eclipse.jetty.server.handler ResourceHandler ContextHandler ContextHandlerCollection HandlerList AbstractHandler)
            (java.util UUID)
-           (javax.servlet.http HttpServletResponse)))
+           (javax.servlet.http HttpServletResponse)
+           (java.net InetSocketAddress)))
 
 (defn static-content-handler
   []
@@ -61,9 +62,11 @@
 (defn start-server
   ([port page-handler]
 
-   (let [server (new Server port)
+   (let [server (new Server)
          handlers [(our-handler page-handler) (static-content-handler)]
          handler-list (new HandlerList)
+         connector (doto (ServerConnector. server 1 1) (.setHost "localhost") (.setPort port))
+         _ (.setConnectors server (into-array Connector [connector]))
          _ (.setHandlers handler-list (into-array Handler handlers))
          _ (. server (setHandler handler-list))
          _ (swap! last-server (fn [s] (when s (.stop s)) server))
