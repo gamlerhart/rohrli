@@ -59,6 +59,8 @@
         curl https://rohrli.gamlor.info
     - Pipe a file to röhrli. It will respond with an URL:
         cat my-file | curl -N --data-binary @- https://rohrli.gamlor.info
+    - Gzip if needed:
+        cat my-file | gzip | curl -N --data-binary @- {service-url}
     - The request will give you an URL. Then read from it on another place:
         curl {the-url-returned} > my-file
         </code>

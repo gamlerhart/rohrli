@@ -3,6 +3,8 @@ You're pipe was created at {download-url}
 
 Download it with:
 - curl {download-url} > my-file.txt
+If you uploaded gzipped, decompress:
+- curl {download-url} | gzip -d > my-file.txt
 
 This pipe is streaming. No data is permanently stored on the server.
 
