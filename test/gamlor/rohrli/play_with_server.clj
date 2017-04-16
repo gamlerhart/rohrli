@@ -15,7 +15,7 @@
 (println "Test reload replacing handler of Jetty")
 
 (def test-config
-  {:url "http://localhost"
+  {:url "http://localhost:8080"
    ::web/http-port 8080
    }
   )
@@ -24,7 +24,7 @@
 (def web-server (web/start-server
                   (fn [req] (@test-server req))
                   test-config))
-(def web-server-url "http://localhost")
+(def web-server-url "http://localhost:8080")
 
 (defn reload-server []
   (println "Test server start")

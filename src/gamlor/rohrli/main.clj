@@ -28,10 +28,10 @@
               {}
               )
         final-cfg (merge
-                    {:url "http://localhost:80"
+                    {:url                "http://localhost:8080"
                      ::web/cert-password ""
-                     ::web/http-port 80
-                     ::web/https-port 443}
+                     ::web/http-port     8080
+                     ::web/https-port    8081}
                     cfg)]
     (log/info "Loaded config is" cfg)
     (log/info "Final config is" final-cfg)
@@ -209,7 +209,7 @@
 (defn start-upload
   "Handle the upload request.
   Give initial info and then place the request into the state/waiting-request maps"
-  [^HttpServletRequest req ^HttpServletResponse resp response-type]
+  [headers ^HttpServletRequest req ^HttpServletResponse resp response-type]
   (.setContentType resp "text/plain;charset=utf-8")
   (let [link-id (random-link-id)
         url (str service-url "/" link-id)
@@ -228,7 +228,8 @@
                    ::writer        writer
                    ::response      resp
                    ::async-context async
-                   ::response-type response-type}}
+                   ::response-type response-type
+                   ::headers       (select-keys headers ["content-length"])}}
                  current)
                ))
       (.setHeader resp "Content-Type" (response-type response-types))
@@ -249,17 +250,19 @@
          ^HttpServletResponse resp ::response
          ^InputStream reader       ::reader
          ^AsyncContext context     ::async-context
-         type                      ::response-type} pending]
+         type                      ::response-type
+         headers                   ::headers} pending]
     (.write writer "\n")
     (.write writer "Download started!\n")
     (.flush writer)
     (.flushBuffer resp)
 
+    (prn headers)
     {
-     :headers {
-               "Content-Type"        "application/octet-stream"
-               "Content-Disposition" (str "attachment; filename=\"" link-id ".bin\"")
-               }
+     :headers (merge headers {
+                              "Content-Type"        "application/octet-stream"
+                              "Content-Disposition" (str "attachment; filename=\"" link-id ".bin\"")
+                              })
      :body
               (proxy [java.io.FilterInputStream] [reader]
                 (close []
@@ -311,11 +314,11 @@
       (response-from-template template-index headers {})
       )
     (POST "/" {headers :headers req ::web/raw-req resp ::web/raw-response}
-      (start-upload req resp ::curl-resp)
+      (start-upload headers req resp ::curl-resp)
       {::web/is-raw-reponse true}
       )
     (POST "/browser-upload" {headers :headers req ::web/raw-req resp ::web/raw-response}
-      (start-upload req resp ::html-resp)
+      (start-upload headers req resp ::html-resp)
       {::web/is-raw-reponse true}
       )
     (GET "/:link-id" {headers :headers {link-id :link-id} :params}

@@ -38,7 +38,7 @@
   (let [post (doto (HttpPost. url)
                (.setEntity (ByteArrayEntity. body)))
         resp (.execute http-client post)
-        link (.getValue (.getFirstHeader resp "X-Download-Url"))]
+        link (.getValue (.getFirstHeader resp "Location"))]
     link
     )
   )
@@ -79,6 +79,15 @@
     (is (= hash (sha256 download)))
     (already-download link "text/html")
     (already-download link "*/*")
-
     )
   )
+
+(deftest holds-content-length
+  (let [body (new-bytes)
+        hash (sha256 body)
+        link (stream-post server/web-server-url body)
+        content-length (-> (http/get link {:as :byte-array}) :headers (get "Content-Length"))]
+    (is (= (str (alength body)) content-length))
+    )
+  )
+
