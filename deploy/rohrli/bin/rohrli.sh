@@ -12,7 +12,8 @@ JAVA_ARGS="-Xmx96m -XX:+UseSerialGC -XX:CICompilerCount=2 -Dfile.encoding=UTF-8 
  -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintTenuringDistribution \
  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$INSTALL_DIR/logs \
  -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1088 -Dcom.sun.management.jmxremote.authenticate=false \
- -Dcom.sun.management.jmxremote.ssl=false"
+ -Dcom.sun.management.jmxremote.ssl=false \
+ -Dsun.security.pkcs11.enable-solaris=false"
 
 cd $INSTALL_DIR
 
