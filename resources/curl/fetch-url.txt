@@ -7,5 +7,8 @@ If you uploaded gzipped, decompress:
 - curl {download-url} | gzip -d > my-file.txt
 
 This pipe is streaming. No data is permanently stored on the server.
+Do not quit (Ctrl-C/D) before the transfer is done.
+
+Verify that the download is complete and correct with: sha1sum my-file.txt
 
 Start your download now. We're waiting for the download to start for 10 minutes
