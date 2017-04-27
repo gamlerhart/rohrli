@@ -217,6 +217,9 @@
         writer (.getWriter resp)]
     (let [reader (pipe-reader req)
           async (.startAsync req)
+          forwared-headers (if (ServletFileUpload/isMultipartContent req)
+                           {}
+                           (select-keys headers ["content-length"]))
           ]
       (.setTimeout async (.toMillis async-timeout))
       (swap! state/waiting-request
@@ -229,7 +232,7 @@
                    ::response      resp
                    ::async-context async
                    ::response-type response-type
-                   ::headers       (select-keys headers ["content-length"])}}
+                   ::headers       forwared-headers}}
                  current)
                ))
       (.setHeader resp "Content-Type" (response-type response-types))

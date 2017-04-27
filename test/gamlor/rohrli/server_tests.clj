@@ -9,7 +9,9 @@
            (gamlor.rohrli Encoding)
            (org.apache.http.impl.client HttpClients CloseableHttpClient)
            (org.apache.http.client.methods HttpPost)
-           (org.apache.http.entity ByteArrayEntity)))
+           (org.apache.http.entity ByteArrayEntity ContentType)
+           (org.apache.http.entity.mime.content FileBody InputStreamBody ByteArrayBody)
+           (org.apache.http.entity.mime MultipartEntityBuilder HttpMultipartMode)))
 
 (server/reload-server)
 
@@ -34,12 +36,26 @@
   )
 
 (def ^CloseableHttpClient http-client (HttpClients/createDefault))
+
 (defn stream-post [^String url ^bytes body]
   (let [post (doto (HttpPost. url)
                (.setEntity (ByteArrayEntity. body)))
         resp (.execute http-client post)
         link (.getValue (.getFirstHeader resp "Location"))]
-    link
+    {::link link ::to-close resp}
+    )
+  )
+
+(defn browser-post [^String url ^bytes body]
+  (let [multipart (.build (doto (MultipartEntityBuilder/create)
+                            (.setMode HttpMultipartMode/BROWSER_COMPATIBLE)
+                            (.addBinaryBody "fileToUpload" body ContentType/APPLICATION_OCTET_STREAM "file1.bin")
+                            ))
+        post (doto (HttpPost. (str url "/browser-upload"))
+               (.setEntity multipart))
+        resp (.execute http-client post)
+        link (.getValue (.getFirstHeader resp "Location"))]
+    {::link link ::to-close resp}
     )
   )
 
@@ -74,20 +90,32 @@
 (deftest upload-download-pair
   (let [body (new-bytes)
         hash (sha256 body)
-        link (stream-post server/web-server-url body)
+        {link ::link to-close ::to-close} (stream-post server/web-server-url body)
         download (:body (http/get link {:as :byte-array}))]
     (is (= hash (sha256 download)))
     (already-download link "text/html")
     (already-download link "*/*")
+    (.close to-close)
     )
   )
 
 (deftest holds-content-length
   (let [body (new-bytes)
         hash (sha256 body)
-        link (stream-post server/web-server-url body)
+        {link ::link to-close ::to-close} (stream-post server/web-server-url body)
         content-length (-> (http/get link {:as :byte-array}) :headers (get "Content-Length"))]
     (is (= (str (alength body)) content-length))
+    (.close to-close)
     )
   )
 
+
+(deftest browser-upload
+  (let [body (new-bytes)
+        hash (sha256 body)
+        {link ::link to-close ::to-close} (browser-post server/web-server-url body)
+        content-length (-> (http/get link {:as :byte-array}) :headers (get "Content-Length"))]
+    (is (nil? content-length))
+    (.close to-close)
+    )
+  )
