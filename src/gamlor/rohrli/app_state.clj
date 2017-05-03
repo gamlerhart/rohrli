@@ -24,7 +24,6 @@
 (def ^AtomicInteger created-count (AtomicInteger.))
 (def ^AtomicInteger timeout-count (AtomicInteger.))
 (def ^AtomicInteger completed-count (AtomicInteger.))
-AtomicInteger
 
 (.scheduleAtFixedRate sheduler
                       (fn []
