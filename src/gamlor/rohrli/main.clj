@@ -153,8 +153,7 @@
           (.close writer)
           (.complete context)
           (complete-request link-id ::expired)
-          (.incrementAndGet state/timeout-count)
-          ))))
+          (.incrementAndGet state/timeout-count))))))
 
 ; Install the ping-waiting-request handler.
 ; We stop the old handler, in case we reloaded this code
@@ -299,8 +298,7 @@
   [& args]
   (println "starting. Arguments: " args)
   (let [server
-        (web/start-server (app-routes) config)
-        ]
+        (web/start-server (app-routes) config)]
     (while (= 0 (.available (System/in)))
       (Thread/sleep 1000))
     (.stop server)))

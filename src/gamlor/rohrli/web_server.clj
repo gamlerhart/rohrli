@@ -93,9 +93,7 @@
                        server
                        )]
     (.setPort connector port)
-    connector
-    )
-  )
+    connector))
 
 (defn- jetty-https
   [server {port ::https-port cert ::https-cert password ::cert-password}]
@@ -103,16 +101,11 @@
                        server
                        (jetty-ssl-context cert password))]
     (.setPort connector port)
-    connector
-    )
-  )
+    connector))
 
 (defn start-server
   ([page-handler config]
-
-   (let [
-         url (:url config)
-         use-https (and (::https-cert config) (::cert-password config))
+   (let [use-https (and (::https-cert config) (::cert-password config))
          server (new Server)
          general-handlers [(our-handler page-handler) (static-content-handler)]
          handlers (if use-https
@@ -128,8 +121,7 @@
          _ (. server (setHandler handler-list))
          _ (swap! last-server (fn [s] (when s (.stop s)) server))
          _ (. server (start))]
-     server))
-  )
+     server)))
 
 
 
