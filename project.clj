@@ -6,15 +6,15 @@
   :source-paths ["src"]
   :java-source-paths ["src"]
   :dependencies [
-                 [org.clojure/clojure "1.8.0"]
-                 [ring/ring-core "1.4.0"]
-                 [ring/ring-servlet "1.4.0"]
-                 [org.eclipse.jetty/jetty-server "9.3.13.v20161014"]
-                 [org.eclipse.jetty/jetty-servlet "9.3.13.v20161014"]
-                 [compojure "1.4.0"]
+                 [org.clojure/clojure "1.10.1"]
+                 [ring/ring-core "1.8.0"]
+                 [ring/ring-servlet "1.8.0"]
+                 [org.eclipse.jetty/jetty-server "9.4.23.v20191118"]
+                 [org.eclipse.jetty/jetty-servlet "9.4.23.v20191118"]
+                 [compojure "1.6.1"]
                  [enlive "1.1.6"]
-                 [org.clojure/tools.logging "0.3.1"]
-                 [ch.qos.logback/logback-classic "1.1.7"]   ;; More logging
+                 [org.clojure/tools.logging "0.5.0"]
+                 [ch.qos.logback/logback-classic "1.2.3"]   ;; More logging
                  ]
 
   :main ^:skip-aot gamlor.rohrli.main
@@ -22,5 +22,5 @@
   :uberjar-name "rohrli.jar"
   :jvm-opts ["-Xmx64m"]
   :profiles {:uberjar {:aot :all}
-             :dev     {:dependencies [[org.clojure/test.check "0.9.0"]
-                                      [clj-http "2.2.0"]]}})
+             :dev     {:dependencies [[org.clojure/test.check "0.10.0"]
+                                      [clj-http "3.10.0"]]}})
