@@ -80,15 +80,13 @@
                      ::html-resp nil
                      })
 (defn- response-from-template [template headers values]
-  (fill-template (get template (response-type headers)) values)
-  )
+  (fill-template (get template (response-type headers)) values))
 
 (def response-types {::curl-resp "plain/text"
                      ::html-resp "text/html"})
 
 (defn- response-mime [headers]
-  (get response-types (response-type headers))
-  )
+  (get response-types (response-type headers)))
 
 (def template-404 (response-template "404"))
 (def template-downloaded (response-template "done-downloaded"))
@@ -111,11 +109,9 @@
 (defn random-vowel [] (.charAt vowels (.nextInt random vowels-length)))
 (defn random-consonant [] (.charAt consonats (.nextInt random consonats-length)))
 (defn random-sylable []
-  (str (random-consonant) (random-vowel) (random-consonant) (random-consonant) (random-vowel) (random-consonant))
-  )
+  (str (random-consonant) (random-vowel) (random-consonant) (random-consonant) (random-vowel) (random-consonant)))
 (defn random-link-id []
-  (str/join "-" (repeatedly syllable-count random-sylable))
-  )
+  (str/join "-" (repeatedly syllable-count random-sylable)))
 
 (def async-timeout (Duration/ofMinutes 15))
 (def end-request-timeout (Duration/ofMinutes 10))
@@ -129,15 +125,13 @@
            (assoc current link-id reason)))
   (swap! state/waiting-request
          (fn [current]
-           (dissoc current link-id)))
-  )
+           (dissoc current link-id))))
 
 (defn ping-waiting-request []
   "Sends a pulse to the pending requests, so they stay alive.
   Also ensures that CURL does not close the request.
   Plus provide a nice feedback to the user that we're waiting for the download"
-  (let [
-        timeout-cutoff (.minus (ZonedDateTime/now ZoneOffset/UTC) end-request-timeout)
+  (let [timeout-cutoff (.minus (ZonedDateTime/now ZoneOffset/UTC) end-request-timeout)
         to-ping @state/waiting-request]
     (log/info "Triggered pending request updates. Pending requests " (count to-ping))
 
@@ -160,11 +154,7 @@
           (.complete context)
           (complete-request link-id ::expired)
           (.incrementAndGet state/timeout-count)
-          )
-        )
-      )
-    )
-  )
+          ))))
 
 ; Install the ping-waiting-request handler.
 ; We stop the old handler, in case we reloaded this code
@@ -172,8 +162,7 @@
        (fn [^ScheduledFuture old]
          (when old
            (.cancel old true))
-         (.scheduleAtFixedRate state/sheduler ping-waiting-request 5 5 TimeUnit/SECONDS)
-         ))
+         (.scheduleAtFixedRate state/sheduler ping-waiting-request 5 5 TimeUnit/SECONDS)))
 
 (defn- first-file-upload
   "Runs through iterator and returns the first file stream.
@@ -184,9 +173,7 @@
       file
       (first-file-upload iter)
       )
-    nil
-    )
-  )
+    nil))
 
 
 (defn pipe-reader [^HttpServletRequest req]
@@ -198,13 +185,8 @@
           (first-file-upload iter)
           (do
             (log/info "No file found in upload. Returning empty stream")
-            (ByteArrayInputStream. (byte-array 0))
-            ))
-        )
-      )
-    (.getInputStream req)
-    )
-  )
+            (ByteArrayInputStream. (byte-array 0))))))
+    (.getInputStream req)))
 
 (defn start-upload
   "Handle the upload request.
@@ -241,10 +223,7 @@
       (.write writer text)
       (.flush writer)
       (.flushBuffer resp)
-      (.incrementAndGet state/created-count)
-      )
-    )
-  )
+      (.incrementAndGet state/created-count))))
 
 (defn start-download [pending link-id]
   (complete-request link-id ::downloaded)
@@ -261,8 +240,7 @@
     (.flushBuffer resp)
 
     (prn headers)
-    {
-     :headers (merge headers {
+    {:headers (merge headers {
                               "Content-Type"        "application/octet-stream"
                               "Content-Disposition" (str "attachment; filename=\"" link-id ".bin\"")
                               })
@@ -271,18 +249,13 @@
                 (close []
                   (.write writer (str (type template-download-complete)))
                   (.complete context)
-                  (.close reader)
-                  )
-                )
-     }
-    )
-  )
+                  (.close reader)))
+     }))
 
 (defn not-found-handling [link-id headers]
   (case
     (get @state/completed-requests link-id ::not-found)
-    ::not-found {
-                 :status  404
+    ::not-found {:status  404
                  :headers {"Content-Type" (response-mime headers)}
                  :body    (response-from-template
                             template-404
@@ -290,8 +263,7 @@
                             {:request-url (str service-url "/" link-id)})
                  }
 
-    ::downloaded {
-                  :status  410
+    ::downloaded {:status  410
                   :headers {"Content-Type" (response-mime headers)}
                   :body    (response-from-template
                              template-downloaded
@@ -299,39 +271,29 @@
                              {:request-url (str service-url "/" link-id)})
                   }
 
-    ::expired {
-               :status  410
+    ::expired {:status  410
                :headers {"Content-Type" (response-mime headers)}
                :body    (response-from-template
                           template-expired
                           headers
                           {:request-url (str service-url "/" link-id)})
-               }
-    )
-  )
+               }))
 
 (defn app-routes []
   (routes
     (GET "/" {headers :headers}
       (.getAndIncrement state/main-site-count)
-      (response-from-template template-index headers {})
-      )
+      (response-from-template template-index headers {}))
     (POST "/" {headers :headers req ::web/raw-req resp ::web/raw-response}
       (start-upload headers req resp ::curl-resp)
-      {::web/is-raw-reponse true}
-      )
+      {::web/is-raw-reponse true})
     (POST "/browser-upload" {headers :headers req ::web/raw-req resp ::web/raw-response}
       (start-upload headers req resp ::html-resp)
-      {::web/is-raw-reponse true}
-      )
+      {::web/is-raw-reponse true})
     (GET "/:link-id" {headers :headers {link-id :link-id} :params}
       (if-let [pending (get @state/waiting-request link-id)]
         (start-download pending link-id)
-        (not-found-handling link-id headers)
-        )
-      )
-    )
-  )
+        (not-found-handling link-id headers)))))
 
 (defn -main
   [& args]
@@ -341,5 +303,4 @@
         ]
     (while (= 0 (.available (System/in)))
       (Thread/sleep 1000))
-    (.stop server))
-  )
+    (.stop server)))
