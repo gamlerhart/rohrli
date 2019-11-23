@@ -2,7 +2,7 @@
 
 source ./shared-test.sh
 
-echo "EXPECT: Help text:"
+echo curl $SERVER
 curl $SERVER
 if [ $? -ne 0 ]; then
     echo "FAILED"
