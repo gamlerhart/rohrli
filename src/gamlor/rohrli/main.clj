@@ -285,10 +285,10 @@
       (response-from-template template-index headers {}))
     (POST "/" {headers :headers req ::web/raw-req resp ::web/raw-response}
       (start-upload headers req resp ::curl-resp)
-      {::web/is-raw-reponse true})
+      {::web/is-raw-response true})
     (POST "/browser-upload" {headers :headers req ::web/raw-req resp ::web/raw-response}
       (start-upload headers req resp ::html-resp)
-      {::web/is-raw-reponse true})
+      {::web/is-raw-response true})
     (GET "/:link-id" {headers :headers {link-id :link-id} :params}
       (if-let [pending (get @state/waiting-request link-id)]
         (start-download pending link-id)

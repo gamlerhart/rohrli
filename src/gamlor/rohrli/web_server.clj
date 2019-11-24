@@ -37,7 +37,7 @@
               response-data (page-handler (merge request-map {::raw-req request ::raw-response response}))]
           (log/info "incomming:" (.getMethod request) url)
           (when response-data
-            (if (::is-raw-reponse response-data)
+            (if (::is-raw-response response-data)
               (do
                 (log/info "handled raw respone:" (.getMethod request) url (.getStatus response) " in " (- (System/currentTimeMillis) start) "ms")
                 )
