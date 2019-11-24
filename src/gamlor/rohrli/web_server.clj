@@ -10,7 +10,8 @@
            (java.util UUID)
            (javax.servlet.http HttpServletResponse)
            (java.net InetSocketAddress)
-           (org.eclipse.jetty.util.ssl SslContextFactory)))
+           (org.eclipse.jetty.util.ssl SslContextFactory)
+           (org.eclipse.jetty.servlet ServletContextHandler)))
 
 (defn static-content-handler
   []
@@ -22,7 +23,7 @@
             (.setWelcomeFiles (into-array ["index.html"]))
             (.setResourceBase path)
             )]
-    resource-handler))
+    (doto (ServletContextHandler.) (.setHandler resource-handler))))
 
 
 
