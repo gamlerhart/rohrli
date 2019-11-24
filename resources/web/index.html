@@ -56,12 +56,14 @@
 
     Basics:
     - Shows this help text. (or web page in a browser)
-        curl https://rohrli.gamlor.info
-    - Pipe a file to röhrli. It will respond with an URL:
-        cat my-file | curl -N --data-binary @- https://rohrli.gamlor.info
+        curl {service-url}
+    - Pipe a file to röhrli. It will respond with a URL:
+        curl -N --data-binary @./my-file {service-url}
+      or pipe it:
+        cat my-file | curl -N --data-binary @- {service-url}
     - Gzip if needed:
         cat my-file | gzip | curl -N --data-binary @- {service-url}
-    - The request will give you an URL. Then read from it on another place:
+    - The request will give you a URL. Then read from it on another place:
         curl {the-url-returned} > my-file
         </code>
         </pre>
