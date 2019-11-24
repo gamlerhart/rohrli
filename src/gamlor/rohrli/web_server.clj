@@ -68,7 +68,7 @@
           )
         ))))
 
-(def last-server (atom nil))
+(defonce last-server (atom nil))
 
 (defn stop-server
   []
