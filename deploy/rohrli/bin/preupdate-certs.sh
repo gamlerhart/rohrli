@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-svcadm disable rohrlid
+systemctl stop rohrli.service
+systemctl disable rohrli.service

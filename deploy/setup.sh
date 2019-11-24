@@ -2,14 +2,14 @@
 set -e
 
 if ! [[ -d /etc/rohrli ]]; then
-    echo "first time installation."
-    echo "Installing OpenJDK 8"
-    pkgin -y install openjdk8
+    echo "First time installation."
+    echo "Installing OpenJDK 11"
+    apt update
+    apt install -y openjdk-11-jdk-headless
 
     echo "Creating service user"
-    groupadd rohrlid
-    useradd -grohrlid -m rohrlid
-    usermod -K defaultpriv=basic,net_privaddr rohrlid
+    groupadd rohrli
+    useradd -grohrli -m rohrli
 else
     echo "Existing installation. Updating"
 fi
@@ -19,12 +19,11 @@ tar -xvf rohrli.tar -C /etc/
 chmod -R u+rx,g+rx /etc/rohrli
 mkdir -p /etc/rohrli/logs
 chmod -R u+rwx,g+rwx /etc/rohrli/logs
-chown -R rohrlid:rohrlid /etc/rohrli
-
+chown -R rohrli:rohrli /etc/rohrli
+[[ -f /etc/systemd/system/rohrli.service ]] || ln -s /etc/rohrli/bin/rohrli.service /etc/systemd/system/rohrli.service
 
 echo "Import, enable and restart service"
-svccfg import /etc/rohrli/rohrlid-service.xml
-svcadm enable rohrlid
-svcadm restart rohrlid
+systemctl enable rohrli.service
+systemctl restart rohrli.service
 
 
