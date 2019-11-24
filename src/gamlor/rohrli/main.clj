@@ -53,8 +53,7 @@
   (reduce
     (fn [txt kv]
       (str/replace txt (str "{" (-> kv first name) "}") (-> kv second))
-      ) template values)
-  )
+      ) template values)  )
 
 (def template-curl-guide
   (fill-template (slurp (io/resource "curl/guide-snippet.txt")) {:service-url service-url}))
@@ -63,8 +62,7 @@
   "Load a class path resource given the name.
   Fills out the :service-url and :guide place holders"
   [resource]
-  (fill-template (slurp (io/resource resource)) {:service-url service-url :guide template-curl-guide})
-  )
+  (fill-template (slurp (io/resource resource)) {:service-url service-url :guide template-curl-guide}))
 
 (defn response-template [resource]
   "Most respononses have a seperate html/curl response.
@@ -72,8 +70,7 @@
   {
    ::curl-resp (template-from-resource (str "curl/" resource ".txt"))
    ::html-resp (template-from-resource (str "web/" resource ".html"))
-   }
-  )
+   })
 
 (def template-index {
                      ::curl-resp (template-from-resource (str "curl/hello.txt"))
