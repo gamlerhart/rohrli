@@ -74,7 +74,7 @@
 
 (def template-index {
                      ::curl-resp (template-from-resource (str "curl/hello.txt"))
-                     ::html-resp nil
+                     ::html-resp (template-from-resource (str "web/index.html"))
                      })
 (defn- response-from-template [template headers values]
   (fill-template (get template (response-type headers)) values))

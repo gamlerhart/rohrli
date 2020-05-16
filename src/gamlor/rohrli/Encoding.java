@@ -5,7 +5,6 @@ package gamlor.rohrli;
  */
 public final class Encoding {
 
-
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];

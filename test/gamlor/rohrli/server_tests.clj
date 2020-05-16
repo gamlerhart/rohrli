@@ -111,11 +111,15 @@
 
 
 (deftest browser-upload
-  (let [body (new-bytes)
-        hash (sha256 body)
-        {link ::link to-close ::to-close} (browser-post server/web-server-url body)
-        content-length (-> (http/get link {:as :byte-array}) :headers (get "Content-Length"))]
-    (is (nil? content-length))
+  (let [original (new-bytes)
+        hash (sha256 original)
+        {link ::link to-close ::to-close} (browser-post server/web-server-url original)
+        {body :body
+         headers :headers} (-> (http/get link {:as :byte-array}))
+        content-length (get headers "Content-Length")]
+    (is (= hash (sha256 body)))
+    (is (= (count original) (count body)))
+    (is (= (str (count original)) content-length))
     (.close to-close)
     )
   )
